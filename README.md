@@ -75,8 +75,9 @@ pnpm dev
 ### Run a single app
 
 ```bash
-pnpm dev:student   # Student app only
-pnpm dev:admin     # Admin app only
+pnpm dev:student        # Student app only
+pnpm dev:student:clean  # Student app (clears Next.js cache first)
+pnpm dev:admin          # Admin app only
 ```
 
 ## Other commands
@@ -94,12 +95,11 @@ pnpm lint          # Lint all packages
 |-------|-------------|
 | `/login` | Student sign in |
 | `/register` | Student registration |
-| `/` | Dashboard |
-| `/courses` | Enrolled courses |
-| `/courses/[courseId]` | Course detail |
-| `/assignments` | Assignments |
-| `/study-assistant` | AI study assistant |
-| `/profile` | Profile settings |
+| `/` | AI Assistant (chat) |
+| `/unit-resources` | Unit materials and downloads |
+| `/assignments` | Assignments and due dates |
+| `/team-support` | Teamwork guidance |
+| `/profile` | Profile and unit access requests |
 
 ### Admin (`apps/admin`)
 
