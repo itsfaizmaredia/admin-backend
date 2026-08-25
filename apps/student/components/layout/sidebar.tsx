@@ -2,42 +2,113 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  AiAssistantIcon,
+  ProfileIcon,
+  TeamSupportIcon,
+  UnitResourcesIcon,
+} from "@/components/icons";
+import { studentProfile } from "@/lib/user-data";
+
+const approvedUnits = [
+  { code: "COS40005", primary: true },
+  { code: "COS40006", primary: false },
+];
 
 const navItems = [
-  { href: "/", label: "Dashboard" },
-  { href: "/courses", label: "Courses" },
-  { href: "/assignments", label: "Assignments" },
-  { href: "/study-assistant", label: "Study Assistant" },
-  { href: "/profile", label: "Profile" },
+  { href: "/", label: "AI Assistant", Icon: AiAssistantIcon },
+  { href: "/unit-resources", label: "Unit Resources", Icon: UnitResourcesIcon },
+  { href: "/team-support", label: "Team Support", Icon: TeamSupportIcon },
+  { href: "/profile", label: "Profile", Icon: ProfileIcon },
 ];
+
+function isActivePath(pathname: string, href: string) {
+  if (href === "/") return pathname === "/";
+  return pathname.startsWith(href);
+}
 
 export function StudentSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 border-r border-gray-200 bg-white p-6">
-      <div className="mb-8">
-        <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Student</p>
-        <h2 className="text-lg font-bold">Study Assistance</h2>
+    <aside className="flex w-[210px] shrink-0 flex-col border-r border-capstone-border bg-white">
+      <div className="px-4 pb-4 pt-5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[6px] bg-capstone-red text-[11px] font-bold text-white">
+            CS
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase leading-[1.3] tracking-[0.06em] text-capstone-red">
+              Capstone
+            </p>
+            <p className="text-[10px] font-bold uppercase leading-[1.3] tracking-[0.08em] text-gray-900">
+              Study Assistant
+            </p>
+          </div>
+        </div>
       </div>
-      <nav className="space-y-1">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`block rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-700 hover:bg-gray-100"
+
+      <div className="px-4 pb-3">
+        <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-400">
+          Approved Units
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {approvedUnits.map(({ code, primary }) => (
+            <span
+              key={code}
+              className={`rounded-full px-2 py-[2px] text-[10px] font-semibold ${
+                primary
+                  ? "bg-capstone-red text-white"
+                  : "border border-capstone-red bg-white text-capstone-red"
               }`}
             >
-              {item.label}
+              {code}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <nav className="flex-1 space-y-0.5 px-2">
+        {navItems.map(({ href, label, Icon }) => {
+          const active = isActivePath(pathname, href);
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex items-center gap-2.5 rounded-[6px] px-2.5 py-2 text-[13px] font-medium transition-colors ${
+                active
+                  ? "bg-capstone-red-light text-capstone-red"
+                  : "text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <Icon
+                className={`shrink-0 ${active ? "text-capstone-red" : "text-gray-500"}`}
+              />
+              <span className="truncate">{label}</span>
             </Link>
           );
         })}
       </nav>
+
+      <div className="border-t border-capstone-border p-3">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-capstone-red text-xs font-semibold text-white">
+            {studentProfile.initials}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-[13px] font-semibold text-gray-900">
+              {studentProfile.name}
+            </p>
+            <p className="text-[11px] text-gray-500">{studentProfile.studentId}</p>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="mt-2.5 text-left text-[9px] leading-snug text-gray-400 hover:text-gray-600"
+        >
+          Do not sell or share my personal info
+        </button>
+      </div>
     </aside>
   );
 }
