@@ -1,5 +1,5 @@
-import { AppHeader } from "@/components/layout/app-header";
-import { StudentSidebar } from "@/components/layout/sidebar";
+import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { StudentProvider } from "@/lib/student-context";
 
 export default function DashboardLayout({
   children,
@@ -7,12 +7,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white">
-      <AppHeader />
-      <div className="flex min-h-0 flex-1">
-        <StudentSidebar />
-        <div className="flex min-w-0 flex-1">{children}</div>
-      </div>
-    </div>
+    <StudentProvider>
+      <DashboardShell>{children}</DashboardShell>
+    </StudentProvider>
   );
 }

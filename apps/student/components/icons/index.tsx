@@ -1,6 +1,7 @@
 import type { IconType } from "react-icons";
 import {
   MdAdd,
+  MdAssignment,
   MdAutoAwesome,
   MdChatBubbleOutline,
   MdDownload,
@@ -28,6 +29,7 @@ function materialIcon(Icon: IconType, defaultClassName: string) {
 
 export const AiAssistantIcon = materialIcon(MdSmartToy, "h-4 w-4");
 export const UnitResourcesIcon = materialIcon(MdMenuBook, "h-4 w-4");
+export const AssignmentsIcon = materialIcon(MdAssignment, "h-4 w-4");
 export const TeamSupportIcon = materialIcon(MdGroups, "h-4 w-4");
 export const ProfileIcon = materialIcon(MdPersonOutline, "h-4 w-4");
 export const SendIcon = materialIcon(MdSend, "h-4 w-4");

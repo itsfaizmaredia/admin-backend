@@ -1,3 +1,3 @@
 # Capstone docs
 
-Add capstone documentation, API notes, and design specs here.
+- [Student portal flow](./student-flow.md) — student UI pages, access model, and API stubs

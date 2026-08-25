@@ -1,12 +1,5 @@
-import { Card } from "@capstone/ui";
+import { AssignmentsPageContent } from "@/components/assignments/assignments-page";
 
 export default function AssignmentsPage() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Assignments</h1>
-      <Card>
-        <p className="text-gray-600">No assignments due.</p>
-      </Card>
-    </div>
-  );
+  return <AssignmentsPageContent />;
 }

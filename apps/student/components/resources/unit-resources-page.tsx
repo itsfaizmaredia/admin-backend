@@ -9,15 +9,24 @@ import {
   type UnitFilter,
 } from "@/lib/resources-data";
 import { ChevronDownIcon, SearchIcon } from "@/components/icons";
+import { useStudent } from "@/lib/student-context";
 import { ResourceCard } from "./resource-card";
 
 export function UnitResourcesPage() {
+  const { approvedUnitCodes } = useStudent();
   const [search, setSearch] = useState("");
   const [unitFilter, setUnitFilter] = useState<UnitFilter>("All My Units");
   const [typeFilter, setTypeFilter] = useState<FileTypeFilter>("All Types");
 
+  const availableUnitFilters = unitFilters.filter(
+    (unit) => unit === "All My Units" || approvedUnitCodes.includes(unit),
+  );
+
   const filteredResources = useMemo(() => {
     return resources.filter((resource) => {
+      const isApproved = resource.units.some((unit) => approvedUnitCodes.includes(unit));
+      if (!isApproved) return false;
+
       const matchesSearch =
         search.trim() === "" ||
         resource.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -25,14 +34,15 @@ export function UnitResourcesPage() {
         resource.description.toLowerCase().includes(search.toLowerCase());
 
       const matchesUnit =
-        unitFilter === "All My Units" || resource.units.includes(unitFilter);
+        unitFilter === "All My Units" ||
+        (resource.units.includes(unitFilter) && approvedUnitCodes.includes(unitFilter));
 
       const matchesType =
         typeFilter === "All Types" || resource.fileType === typeFilter;
 
       return matchesSearch && matchesUnit && matchesType;
     });
-  }, [search, unitFilter, typeFilter]);
+  }, [approvedUnitCodes, search, unitFilter, typeFilter]);
 
   return (
     <div className="flex min-w-0 flex-1 flex-col overflow-y-auto bg-white">
@@ -70,29 +80,38 @@ export function UnitResourcesPage() {
           </div>
         </div>
 
-        <div className="mt-3 flex gap-1.5">
-          {unitFilters.map((unit) => {
-            const active = unitFilter === unit;
-            return (
-              <button
-                key={unit}
-                type="button"
-                onClick={() => setUnitFilter(unit)}
-                className={`rounded-full px-3 py-1 text-[12px] font-semibold transition-colors ${
-                  active
-                    ? "bg-capstone-red text-white"
-                    : "border border-capstone-red bg-white text-capstone-red hover:bg-capstone-red-light"
-                }`}
-              >
-                {unit}
-              </button>
-            );
-          })}
-        </div>
+        {approvedUnitCodes.length > 0 ? (
+          <div className="mt-3 flex gap-1.5">
+            {availableUnitFilters.map((unit) => {
+              const active = unitFilter === unit;
+              return (
+                <button
+                  key={unit}
+                  type="button"
+                  onClick={() => setUnitFilter(unit)}
+                  className={`rounded-full px-3 py-1 text-[12px] font-semibold transition-colors ${
+                    active
+                      ? "bg-capstone-red text-white"
+                      : "border border-capstone-red bg-white text-capstone-red hover:bg-capstone-red-light"
+                  }`}
+                >
+                  {unit}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       <div className="bg-figma-page px-6 py-5">
-        {filteredResources.length > 0 ? (
+        {approvedUnitCodes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-[13px] font-medium text-gray-900">No approved units</p>
+            <p className="mt-1 text-[13px] text-gray-500">
+              Request access from Profile. Resources appear after professor approval.
+            </p>
+          </div>
+        ) : filteredResources.length > 0 ? (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {filteredResources.map((resource) => (
               <ResourceCard key={resource.id} resource={resource} />

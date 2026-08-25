@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "turbo dev",
     "dev:student": "pnpm --filter student dev",
+    "dev:student:clean": "pnpm --filter student dev:clean",
     "dev:admin": "pnpm --filter admin dev",
     "build": "turbo build",
     "lint": "turbo lint"

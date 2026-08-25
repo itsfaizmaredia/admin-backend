@@ -4,20 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   AiAssistantIcon,
+  AssignmentsIcon,
   ProfileIcon,
   TeamSupportIcon,
   UnitResourcesIcon,
 } from "@/components/icons";
-import { studentProfile } from "@/lib/user-data";
-
-const approvedUnits = [
-  { code: "COS40005", primary: true },
-  { code: "COS40006", primary: false },
-];
+import { useStudent } from "@/lib/student-context";
 
 const navItems = [
   { href: "/", label: "AI Assistant", Icon: AiAssistantIcon },
   { href: "/unit-resources", label: "Unit Resources", Icon: UnitResourcesIcon },
+  { href: "/assignments", label: "Assignments", Icon: AssignmentsIcon },
   { href: "/team-support", label: "Team Support", Icon: TeamSupportIcon },
   { href: "/profile", label: "Profile", Icon: ProfileIcon },
 ];
@@ -29,6 +26,7 @@ function isActivePath(pathname: string, href: string) {
 
 export function StudentSidebar() {
   const pathname = usePathname();
+  const { profile, approvedUnits } = useStudent();
 
   return (
     <aside className="flex w-[210px] shrink-0 flex-col border-r border-capstone-border bg-white">
@@ -52,20 +50,24 @@ export function StudentSidebar() {
         <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.12em] text-gray-400">
           Approved Units
         </p>
-        <div className="flex flex-wrap gap-1.5">
-          {approvedUnits.map(({ code, primary }) => (
-            <span
-              key={code}
-              className={`rounded-full px-2 py-[2px] text-[10px] font-semibold ${
-                primary
-                  ? "bg-capstone-red text-white"
-                  : "border border-capstone-red bg-white text-capstone-red"
-              }`}
-            >
-              {code}
-            </span>
-          ))}
-        </div>
+        {approvedUnits.length > 0 ? (
+          <div className="flex flex-wrap gap-1.5">
+            {approvedUnits.map((unit, index) => (
+              <span
+                key={unit.code}
+                className={`rounded-full px-2 py-[2px] text-[10px] font-semibold ${
+                  index === 0
+                    ? "bg-capstone-red text-white"
+                    : "border border-capstone-red bg-white text-capstone-red"
+                }`}
+              >
+                {unit.code}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[10px] leading-snug text-gray-500">No approved units yet</p>
+        )}
       </div>
 
       <nav className="flex-1 space-y-0.5 px-2">
@@ -93,13 +95,11 @@ export function StudentSidebar() {
       <div className="border-t border-capstone-border p-3">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-capstone-red text-xs font-semibold text-white">
-            {studentProfile.initials}
+            {profile.initials}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-semibold text-gray-900">
-              {studentProfile.name}
-            </p>
-            <p className="text-[11px] text-gray-500">{studentProfile.studentId}</p>
+            <p className="truncate text-[13px] font-semibold text-gray-900">{profile.name}</p>
+            <p className="text-[11px] text-gray-500">{profile.studentId}</p>
           </div>
         </div>
         <button
