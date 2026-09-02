@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -13,7 +14,11 @@ import {
   UnitBadge,
 } from "@/components/Badge";
 
-import { students as mockStudents } from "@/lib/mock-data";
+import {
+  fetchStudents,
+  grantUnit,
+  revokeUnit,
+} from "@/lib/api";
 
 import type {
   Student,
@@ -44,7 +49,18 @@ const allUnits = [
 
 export default function Students() {
   const [rows, setRows] =
-  useState<Student[]>(mockStudents);
+    useState<Student[]>([]);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    fetchStudents()
+      .then(setRows)
+      .catch((err) =>
+        setError(err.message)
+      );
+  }, []);
 
   const [search, setSearch] =
     useState("");
@@ -88,27 +104,29 @@ export default function Students() {
     );
   }
 
-  function removeUnit(
+  async function removeUnit(
     code: string
   ) {
     if (!selectedStudent) {
       return;
     }
 
-    updateStudent({
-      ...selectedStudent,
+    try {
+      const updated =
+        await revokeUnit(
+          selectedStudent.id,
+          code
+        );
 
-      approvedUnits:
-        selectedStudent
-          .approvedUnits
-          .filter(
-            (unit) =>
-              unit !== code
-          ),
-    });
+      updateStudent(updated);
+    } catch (err) {
+      setError(
+        (err as Error).message
+      );
+    }
   }
 
-  function addUnit(
+  async function addUnit(
     code: string
   ) {
     if (!selectedStudent) {
@@ -123,23 +141,19 @@ export default function Students() {
       return;
     }
 
-    updateStudent({
-      ...selectedStudent,
+    try {
+      const updated =
+        await grantUnit(
+          selectedStudent.id,
+          code
+        );
 
-      approvedUnits: [
-        ...selectedStudent
-          .approvedUnits,
-        code,
-      ],
-
-      pendingUnits:
-        selectedStudent
-          .pendingUnits
-          .filter(
-            (unit) =>
-              unit !== code
-          ),
-    });
+      updateStudent(updated);
+    } catch (err) {
+      setError(
+        (err as Error).message
+      );
+    }
   }
 
   const availableUnits =
@@ -164,6 +178,12 @@ export default function Students() {
         <p className="pageSub">
           {rows.length} students registered
         </p>
+
+        {error && (
+          <p className="loginError">
+            {error}
+          </p>
+        )}
 
         <div className="tablePanel">
           <div className="searchRow">

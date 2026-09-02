@@ -8,7 +8,7 @@ export type RequestStatus =
   | "Rejected";
 
 export type Student = {
-  id: number;
+  id: string;
   name: string;
   studentId: string;
   email: string;
@@ -18,7 +18,7 @@ export type Student = {
 };
 
 export type UnitAccessRequest = {
-  id: number;
+  id: string;
   name: string;
   studentId: string;
   requestedAt: string;
@@ -29,7 +29,7 @@ export type UnitAccessRequest = {
 };
 
 export type Resource = {
-  id: number;
+  id: string;
   title: string;
   filename: string;
   units: string[];
@@ -40,7 +40,7 @@ export type Resource = {
 };
 
 export type AdminUser = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: "Admin";

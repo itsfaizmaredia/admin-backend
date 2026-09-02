@@ -1,11 +1,29 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import AdminShell from "@/components/AdminShell";
 import { StatusBadge } from "@/components/Badge";
-import { overview } from "@/lib/mock-data";
+import { fetchOverview } from "@/lib/api";
+import type { OverviewData } from "@/lib/types";
+
+const emptyOverview: OverviewData = {
+  totalStudents: 0,
+  pendingRequests: 0,
+  activeUnits: 0,
+  totalResources: 0,
+  recentRequests: [],
+};
 
 export default function Overview() {
-  const data = overview;
+  const [data, setData] = useState<OverviewData>(emptyOverview);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchOverview()
+      .then(setData)
+      .catch((err) => setError(err.message));
+  }, []);
 
   return (
     <AdminShell>
@@ -15,6 +33,8 @@ export default function Overview() {
         <p className="pageSub">
           System summary for Capstone Study Assistant
         </p>
+
+        {error && <p className="loginError">{error}</p>}
 
         <div className="statsGrid">
           <div className="statCard blue">
@@ -72,6 +92,10 @@ export default function Overview() {
         </div>
 
         <div className="panel">
+          {data.recentRequests.length === 0 && (
+            <div className="requestRow">No requests yet.</div>
+          )}
+
           {data.recentRequests.map((request) => (
             <div
               className="requestRow"

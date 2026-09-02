@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -13,8 +14,9 @@ import {
 } from "@/components/Badge";
 
 import {
-  requests as mockRequests,
-} from "@/lib/mock-data";
+  decideRequest,
+  fetchRequests,
+} from "@/lib/api";
 
 import type {
   RequestStatus,
@@ -22,8 +24,19 @@ import type {
 } from "@/lib/types";
 
 export default function Requests() {
- const [rows, setRows] =
-  useState<UnitAccessRequest[]>(mockRequests);
+  const [rows, setRows] =
+    useState<UnitAccessRequest[]>([]);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    fetchRequests()
+      .then(setRows)
+      .catch((err) =>
+        setError(err.message)
+      );
+  }, []);
 
   const [tab, setTab] =
     useState<
@@ -70,21 +83,33 @@ export default function Requests() {
       [rows, tab]
     );
 
-  function setStatus(
-    id: number,
-    status: RequestStatus
+  async function setStatus(
+    id: string,
+    status: Exclude<
+      RequestStatus,
+      "Pending"
+    >
   ) {
-    setRows((current) =>
-      current.map(
-        (request) =>
-          request.id === id
-            ? {
-                ...request,
-                status,
-              }
-            : request
-      )
-    );
+    try {
+      const updated =
+        await decideRequest(
+          id,
+          status
+        );
+
+      setRows((current) =>
+        current.map(
+          (request) =>
+            request.id === id
+              ? updated
+              : request
+        )
+      );
+    } catch (err) {
+      setError(
+        (err as Error).message
+      );
+    }
   }
 
   return (

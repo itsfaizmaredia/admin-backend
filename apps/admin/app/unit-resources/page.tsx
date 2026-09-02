@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -14,8 +15,11 @@ import {
 } from "../../components/Badge";
 
 import {
-  resources as mockResources,
-} from "../../lib/mock-data";
+  createResource,
+  deleteResource as deleteResourceApi,
+  fetchResources,
+  toggleResourceVisibility,
+} from "../../lib/api";
 
 import type {
   Resource,
@@ -93,9 +97,18 @@ export default function Resources() {
   =================================================== */
 
   const [rows, setRows] =
-    useState<Resource[]>(
-      mockResources
-    );
+    useState<Resource[]>([]);
+
+  const [loadError, setLoadError] =
+    useState("");
+
+  useEffect(() => {
+    fetchResources()
+      .then(setRows)
+      .catch((err) =>
+        setLoadError(err.message)
+      );
+  }, []);
 
   const [search, setSearch] =
     useState("");
@@ -263,7 +276,7 @@ export default function Resources() {
      UPLOAD RESOURCE
   =================================================== */
 
-  function uploadResource() {
+  async function uploadResource() {
     setError("");
 
     if (!title.trim()) {
@@ -293,85 +306,74 @@ export default function Resources() {
       return;
     }
 
-    const newResource: Resource =
-      {
-        id: Date.now(),
+    try {
+      const created =
+        await createResource({
+          title: title.trim(),
 
-        title:
-          title.trim(),
+          filename: file.name,
 
-        filename:
-          file.name,
+          units: selectedUnits,
 
-        units:
-          selectedUnits,
+          category,
 
-        category,
-
-        type:
-          detectFileType(
+          type: detectFileType(
             file.name
           ),
 
-        visible: true,
-      };
+          description:
+            description.trim(),
+        });
 
-    setRows(
-      (current) => [
-        newResource,
-        ...current,
-      ]
-    );
+      setRows(
+        (current) => [
+          created,
+          ...current,
+        ]
+      );
 
-    /*
-      Description is kept in the
-      frontend form for the prototype.
-
-      Later the backend can store:
-      description
-    */
-
-    console.log(
-      "Resource description:",
-      description
-    );
-
-    closeUploadModal();
+      closeUploadModal();
+    } catch (err) {
+      setError(
+        (err as Error).message
+      );
+    }
   }
 
   /* ===================================================
      SHOW / HIDE RESOURCE
   =================================================== */
 
-  function toggleVisibility(
-    id: number
+  async function toggleVisibility(
+    id: string
   ) {
-    setRows((current) =>
-      current.map(
-        (resource) => {
-          if (
+    try {
+      const updated =
+        await toggleResourceVisibility(
+          id
+        );
+
+      setRows((current) =>
+        current.map(
+          (resource) =>
             resource.id === id
-          ) {
-            return {
-              ...resource,
-
-              visible:
-                !resource.visible,
-            };
-          }
-
-          return resource;
-        }
-      )
-    );
+              ? updated
+              : resource
+        )
+      );
+    } catch (err) {
+      setLoadError(
+        (err as Error).message
+      );
+    }
   }
 
   /* ===================================================
      DELETE RESOURCE
   =================================================== */
 
-  function deleteResource(
-    id: number
+  async function deleteResource(
+    id: string
   ) {
     const confirmed =
       window.confirm(
@@ -382,12 +384,20 @@ export default function Resources() {
       return;
     }
 
-    setRows((current) =>
-      current.filter(
-        (resource) =>
-          resource.id !== id
-      )
-    );
+    try {
+      await deleteResourceApi(id);
+
+      setRows((current) =>
+        current.filter(
+          (resource) =>
+            resource.id !== id
+        )
+      );
+    } catch (err) {
+      setLoadError(
+        (err as Error).message
+      );
+    }
   }
 
   /* ===================================================

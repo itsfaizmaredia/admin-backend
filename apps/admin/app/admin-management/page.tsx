@@ -2,6 +2,7 @@
 
 import {
   FormEvent,
+  useEffect,
   useState,
 } from "react";
 
@@ -13,8 +14,10 @@ import {
 } from "@/components/Badge";
 
 import {
-  admins as mockAdmins,
-} from "@/lib/mock-data";
+  createAdmin as createAdminApi,
+  fetchAdmins,
+  toggleAdmin,
+} from "@/lib/api";
 
 import type {
   AdminUser,
@@ -22,7 +25,18 @@ import type {
 
 export default function AdminManagement() {
   const [rows, setRows] =
-  useState<AdminUser[]>(mockAdmins);
+    useState<AdminUser[]>([]);
+
+  const [error, setError] =
+    useState("");
+
+  useEffect(() => {
+    fetchAdmins()
+      .then(setRows)
+      .catch((err) =>
+        setError(err.message)
+      );
+  }, []);
 
   const [open, setOpen] =
     useState(false);
@@ -37,25 +51,26 @@ export default function AdminManagement() {
     useState("");
 
 
-  function toggle(
-    id: number
+  async function toggle(
+    id: string
   ) {
-    setRows((current) =>
-      current.map(
-        (admin) =>
-          admin.id === id
-            ? {
-                ...admin,
+    try {
+      const updated =
+        await toggleAdmin(id);
 
-                status:
-                  admin.status ===
-                  "Active"
-                    ? "Inactive"
-                    : "Active",
-              }
-            : admin
-      )
-    );
+      setRows((current) =>
+        current.map(
+          (admin) =>
+            admin.id === id
+              ? updated
+              : admin
+        )
+      );
+    } catch (err) {
+      setError(
+        (err as Error).message
+      );
+    }
   }
 
   function closeModal() {
@@ -65,7 +80,7 @@ export default function AdminManagement() {
     setPassword("");
   }
 
-  function createAdmin(
+  async function createAdmin(
     event: FormEvent
   ) {
     event.preventDefault();
@@ -78,32 +93,27 @@ export default function AdminManagement() {
       return;
     }
 
-    const admin: AdminUser =
-      {
-        id: Date.now(),
+    try {
+      const admin =
+        await createAdminApi({
+          name: name.trim(),
+          email: email.trim(),
+          password,
+        });
 
-        name:
-          name.trim(),
+      setRows(
+        (current) => [
+          ...current,
+          admin,
+        ]
+      );
 
-        email:
-          email.trim(),
-
-        role: "Admin",
-
-        status: "Active",
-
-        lastLogin:
-          "Never",
-      };
-
-    setRows(
-      (current) => [
-        ...current,
-        admin,
-      ]
-    );
-
-    closeModal();
+      closeModal();
+    } catch (err) {
+      setError(
+        (err as Error).message
+      );
+    }
   }
 
   return (
@@ -123,6 +133,12 @@ export default function AdminManagement() {
             >
               {rows.length} administrator accounts
             </p>
+
+            {error && (
+              <p className="loginError">
+                {error}
+              </p>
+            )}
           </div>
 
           <button

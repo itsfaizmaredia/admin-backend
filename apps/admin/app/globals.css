@@ -1140,3 +1140,33 @@ td {
     width: 95vw;
   }
 }
+/* ---- Added for backend wiring ---- */
+.loginError {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 14px;
+}
+
+.signOutBtn {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.signOutBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.signBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

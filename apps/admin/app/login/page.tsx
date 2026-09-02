@@ -5,6 +5,8 @@ import {
   useState,
 } from "react";
 
+import { login } from "@/lib/api";
+
 import {
   useRouter,
 } from "next/navigation";
@@ -16,19 +18,45 @@ export default function Login() {
   const [password, setPassword] =
     useState("");
 
+  const [error, setError] =
+    useState("");
+
+  const [busy, setBusy] =
+    useState(false);
+
   const router =
     useRouter();
 
-  function submit(
+  async function submit(
     event: FormEvent
   ) {
     event.preventDefault();
 
     if (
-      email.trim() &&
-      password.trim()
+      !email.trim() ||
+      !password.trim()
     ) {
+      return;
+    }
+
+    setBusy(true);
+    setError("");
+
+    try {
+      await login(
+        email.trim(),
+        password
+      );
+
       router.push("/");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Sign in failed"
+      );
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -106,11 +134,20 @@ export default function Login() {
             Forgot password?
           </button>
 
+          {error && (
+            <p className="loginError">
+              {error}
+            </p>
+          )}
+
           <button
             className="signBtn"
             type="submit"
+            disabled={busy}
           >
-            Sign In
+            {busy
+              ? "Signing in..."
+              : "Sign In"}
           </button>
         </form>
 
@@ -120,15 +157,7 @@ export default function Login() {
           </strong>
 
           <span>
-            Student (COS40005): sarah.lee@student.edu.au / student123
-          </span>
-
-          <span>
-            Student (both units): jordan.tan@student.edu.au / student123
-          </span>
-
-          <span>
-            Admin: sarah.mitchell@swinburne.edu.au / admin123
+            Admin: admin@capstone.edu.au / Admin@123
           </span>
         </div>
       </div>

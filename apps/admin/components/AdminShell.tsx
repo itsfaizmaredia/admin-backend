@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, type ReactNode } from "react";
 import { Icon } from "./Icons";
+import { clearToken, fetchOverview, getToken } from "@/lib/api";
+import type { AdminUser } from "@/lib/types";
 
 const items = [
   ["/", "Overview", "overview"],
@@ -31,6 +33,41 @@ export default function AdminShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const [me, setMe] = useState<AdminUser | null>(null);
+  const [pending, setPending] = useState(0);
+  const [ready, setReady] = useState(false);
+
+  /* Bounce to /login when there is no token, then load the sidebar data. */
+  useEffect(() => {
+    if (!getToken()) {
+      router.replace("/login");
+      return;
+    }
+
+    setReady(true);
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/auth/me`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setMe(data))
+      .catch(() => setMe(null));
+
+    fetchOverview()
+      .then((data) => setPending(data.pendingRequests))
+      .catch(() => setPending(0));
+  }, [router]);
+
+  function signOut() {
+    clearToken();
+    router.replace("/login");
+  }
+
+  if (!ready) {
+    return null;
+  }
 
   return (
     <div className="shell">
@@ -75,11 +112,12 @@ export default function AdminShell({
                 <span>{label}</span>
 
                 {href ===
-                  "/unit-access-requests" && (
-                  <span className="sideBadge">
-                    1
-                  </span>
-                )}
+                  "/unit-access-requests" &&
+                  pending > 0 && (
+                    <span className="sideBadge">
+                      {pending}
+                    </span>
+                  )}
               </Link>
             )
           )}
@@ -87,18 +125,26 @@ export default function AdminShell({
 
         <div className="sidebarUser">
           <div className="avatar dark">
-            D
+            {me?.name?.[0] ?? "A"}
           </div>
 
           <div>
             <div className="sideUserName">
-              Dr. Sarah Mitchell
+              {me?.name ?? "Admin"}
             </div>
 
             <div className="sideUserRole">
-              Admin
+              {me?.email ?? "Admin"}
             </div>
           </div>
+
+          <button
+            type="button"
+            className="signOutBtn"
+            onClick={signOut}
+          >
+            Sign out
+          </button>
 
           <div className="privacy">
             Do not sell or share my personal info
